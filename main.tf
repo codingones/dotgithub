@@ -1,7 +1,7 @@
 terraform {
   backend "remote" {
     hostname     = "app.terraform.io"
-    organization = "$ORGANIZATION"
+    organization = "ORGANIZATION_NAME"
 
     workspaces {
       name = "organization"

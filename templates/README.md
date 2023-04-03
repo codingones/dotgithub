@@ -1,11 +1,8 @@
-# dotgithub template
-
-Attention ce repos est un intermédiaire de génération !
-Executez l'action 'Apply the configuration' pour avoir la bonne définition de votre infrastructure github gérée par terraform !
+# .github
 
 Ce dépôt a pour vocation de décrire votre projet sur la page d'accueil de l'organization GitHub.
 
-Le contenu affiché est rédigé dans le fichier [README.md du dossier profile](templates/README_ORGANIZATION.md).
+Le contenu affiché est rédigé dans le fichier [README.md du dossier profile](./profile/README.md).
 
 # Développement avec Terraform
 
@@ -71,16 +68,16 @@ Pour que les modifications de la description de l'infrastructure soient appliqu�
 
 #### CI
 
-- [Github Actions](https://docs.github.com/en/actions) est l'outil d'intégration et de déploiement continu intégré à GitHub
+- [Github Actions](https://docs.github.com/en/actions) est l'outil d'intégration et de déploiement continu intégré à GitHub.
 - Secrets du dépôt :
-    - `TF_API_TOKEN` : Le token d'api Terraform Cloud qui permet à la CI d'opérer des actions sur Terraform Cloud
+  - `TF_API_TOKEN` : Le token d'api Terraform Cloud qui permet à la CI d'opérer des actions sur Terraform Cloud
 
 #### Déploiement
 
 - [Terraform Cloud](https://app.terraform.io/) est la plateforme proposée par HashiCorp pour administrer les modifications d'infrastructure
-    - Organization : [ORGANIZATION_NAME](https://app.terraform.io/app/ORGANIZATION_NAME/workspaces)
-    - Workspaces : `organization`
-        - [organization](https://app.terraform.io/app/ORGANIZATION_NAME/workspaces/organization)
+  - Organization : [ORGANIZATION_NAME](https://app.terraform.io/app/ORGANIZATION_NAME/workspaces)
+  - Workspaces : `organization`
+    - [organization](https://app.terraform.io/app/ORGANIZATION_NAME/workspaces/organization)
 
 
 ## Licence

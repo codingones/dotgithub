@@ -14,11 +14,11 @@ locals {
       client = var.organization_name
     }
     stakeholders : {
-      business_owner  = "romain-cambonie@gmail.com"
-      technical_owner = "romain-cambonie@gmail.com"
-      approver        = "romain-cambonie@gmail.com"
+      business_owner  = "USER_EMAIL"
+      technical_owner = "USER_EMAIL"
+      approver        = "USER_EMAIL"
       creator         = "terraform"
-      team            = "romain-cambonie"
+      team            = "USER_NAME"
     }
     repository : ".github"
   }

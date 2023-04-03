@@ -1,4 +1,4 @@
-# My awesome github organization !
+# My awesome github organization: ORGANIZATION_NAME !
 
 A brief description of your project would do wonders here !
 
