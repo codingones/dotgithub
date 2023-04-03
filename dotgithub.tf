@@ -61,7 +61,7 @@ resource "github_repository_file" "dotgithub_repository_definition" {
   repository          = github_repository.organization.name
   branch              = github_branch_default.main.branch
   file                = "dotgithub.tf"
-  content             = file("${path.module}/template/dotgithub.tf")
+  content             = file("${path.module}/templates/dotgithub.tf")
   overwrite_on_create = true
 
   lifecycle {
@@ -75,7 +75,7 @@ resource "github_repository_file" "dotgithub_repository_terraform_main_definitio
   repository          = github_repository.organization.name
   branch              = github_branch_default.main.branch
   file                = "main.tf"
-  content             = file("${path.module}/main.tf")
+  content             = file("${path.module}/templates/main.tf")
   overwrite_on_create = true
 
   lifecycle {
@@ -86,7 +86,7 @@ resource "github_repository_file" "dotgithub_repository_terraform_main_definitio
 resource "github_repository_file" "dotgithub_repository_terraform_variables_definition" {
   repository          = github_repository.organization.name
   branch              = github_branch_default.main.branch
-  file                = "variables1.tf"
+  file                = "variables.tf"
   content             = file("${path.module}/variables.tf")
   overwrite_on_create = true
 
@@ -112,6 +112,18 @@ resource "github_repository_file" "dotgithub_repository_terraform_workflow_defin
   branch              = github_branch_default.main.branch
   file                = ".github/workflows/terraform.yml"
   content             = file("${path.module}/templates/terraform.yml")
+  overwrite_on_create = true
+
+  lifecycle {
+    ignore_changes = all
+  }
+}
+
+resource "github_repository_file" "dotgithub_repository_aws_organization_workflow_definition" {
+  repository          = github_repository.organization.name
+  branch              = github_branch_default.main.branch
+  file                = ".github/workflows/add-aws-organization-infrastructure-repository.yml"
+  content             = file("${path.module}/templates/add-aws-organization-infrastructure-repository.yml")
   overwrite_on_create = true
 
   lifecycle {

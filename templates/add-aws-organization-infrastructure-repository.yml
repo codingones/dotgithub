@@ -1,0 +1,59 @@
+name: Clone File
+
+on:
+  workflow_dispatch:
+
+jobs:
+  add-aws-organization-infrastructure:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get current repository organization
+        id: repo_org
+        run: |
+          org_name=$(echo $GITHUB_REPOSITORY | cut -d '/' -f 1)
+          echo "Organization: $org_name"
+          echo "org_name=$org_name" >> $GITHUB_ENV
+
+      - name: Get user information
+        id: user_info
+        run: |
+          response=$(curl -s -H "Authorization: token ${{ secrets.SETUP_TOKEN }}" https://api.github.com/user)
+          user_name=$(echo "$response" | jq -r '.name')
+          user_email=$(echo "$response" | jq -r '.email')
+          echo "user_name=$user_name" >> $GITHUB_ENV
+          echo "user_email=$user_email" >> $GITHUB_ENV
+
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          repository: ${{ env.org_name }}/.github
+          token: ${{ secrets.SETUP_TOKEN }}
+
+      - name: Clone infrastructure file from remote repository
+        run: |
+          curl -O https://raw.githubusercontent.com/codingones/aws-infrastructure-templates/main/aws-organization-infrastructure.tf
+
+
+      #- name: Replace ORGANIZATION_NAME with the actual organization name
+      #  uses: jacobtomlinson/gha-find-replace@v3
+      #  with:
+      #    find: "ORGANIZATION_NAME"
+      #    replace: ${{ env.org_name }}
+      #    include: "**"
+      #    regex: false
+#
+      #- name: Replace ORGANIZATION_NAME with the actual organization name
+      #  uses: jacobtomlinson/gha-find-replace@v3
+      #  with:
+      #    find: "USER_EMAIL"
+      #    replace: ${{ env.user_email }}
+      #    include: "**"
+      #    regex: false
+
+      - name: Commit and push changes
+        run: |
+          git config user.name "${{ env.user_name }}"
+          git config user.email "${{ env.user_email }}"
+          git add .
+          git diff --quiet && git diff --staged --quiet || git commit -m "Added AWS Organization infrastructure definition"
+          git push

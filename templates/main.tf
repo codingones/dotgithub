@@ -13,10 +13,18 @@ terraform {
       source  = "integrations/github"
       version = "~> 4.0"
     }
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 4.11"
+    }
   }
 }
 
 provider "github" {
   token = var.github_token
   owner = var.organization_name
+}
+
+provider "aws" {
+  region = "us-east-1"
 }
