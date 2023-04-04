@@ -5,14 +5,15 @@ variable "github_token" {
   sensitive   = true
 }
 
-variable "organization_name" {
-  description = "Your Organization Name"
+variable "tfe_team_token" {
+  description = "Team token to manage terraform organization itself"
   nullable    = false
   default     = false
+  sensitive   = true
 }
 
-variable "tfe_owners_team_id" {
-  description = "Tfe owners team id"
+variable "organization_name" {
+  description = "Your Organization Name"
   nullable    = false
   default     = false
 }

@@ -1,4 +1,4 @@
-name: 'Apply the configuration'
+name: 'Apply the infrastructure configuration'
 
 # Attention this workflow can update or even delete repositories it is NOT RECOMMENDED to set it on push.
 on:

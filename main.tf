@@ -11,12 +11,19 @@ terraform {
   required_providers {
     github = {
       source  = "integrations/github"
-      version = "~> 4.0"
+      version = "~> 5.20"
+    }
+    tfe = {
+      version = "~> 0.43.0"
     }
   }
 }
 
 provider "github" {
+  owner = "ORGANIZATION_NAME"
   token = var.github_token
-  owner = var.organization_name
+}
+
+provider "tfe" {
+  hostname = "app.terraform.io"
 }

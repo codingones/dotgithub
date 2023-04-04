@@ -1,12 +1,23 @@
 name: 'Apply the configuration and delete this repo'
 
+concurrency:
+  group: ${{ github.ref }}
+  cancel-in-progress: true
+
 on:
   workflow_dispatch:
+#  push:
+#    branches:
+#      - 'main'
 
+# TODO Fix token not working
 jobs:
   terraform:
     name: 'Terraform'
     runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.SETUP_TOKEN }}
+      TFE_TOKEN: ${{ secrets.TF_CLOUD_PERSONAL_API_TOKEN }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -14,7 +25,7 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
         with:
-          cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
+          cli_config_credentials_token: ${{ secrets.TF_CLOUD_PERSONAL_API_TOKEN }}
 
       - name: Terraform Format
         id: fmt
@@ -31,6 +42,9 @@ jobs:
       - name: Terraform Apply
         if: github.ref == 'refs/heads/main'
         run: |
+          echo "tfe_owners_team_id = \"${{ vars.TFE_OWNERS_TEAM_ID }}\"" > terraform.auto.tfvars
+          echo "github_token = \"${{ secrets.SETUP_TOKEN }}\"" >> terraform.auto.tfvars
+          echo "tfe_token = \"${{ secrets.TF_CLOUD_PERSONAL_API_TOKEN }}\"" >> terraform.auto.tfvars
           terraform apply -auto-approve -input=false
 
   #delete-repo:

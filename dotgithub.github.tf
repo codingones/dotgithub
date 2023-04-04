@@ -60,16 +60,14 @@ resource "github_repository_file" "dotgithub_repository_terraformignore_definiti
 resource "github_repository_file" "dotgithub_repository_definition" {
   repository          = github_repository.organization.name
   branch              = github_branch_default.main.branch
-  file                = "dotgithub.tf"
-  content             = file("${path.module}/templates/dotgithub.tf")
+  file                = "dotgithub.github.tf"
+  content             = file("${path.module}/templates/dotgithub.github.tf")
   overwrite_on_create = true
 
   lifecycle {
     ignore_changes = all
   }
 }
-
-
 
 resource "github_repository_file" "dotgithub_repository_terraform_main_definition" {
   repository          = github_repository.organization.name
@@ -124,6 +122,18 @@ resource "github_repository_file" "dotgithub_repository_aws_organization_workflo
   branch              = github_branch_default.main.branch
   file                = ".github/workflows/add-aws-organization-infrastructure-repository.yml"
   content             = file("${path.module}/templates/add-aws-organization-infrastructure-repository.yml")
+  overwrite_on_create = true
+
+  lifecycle {
+    ignore_changes = all
+  }
+}
+
+resource "github_repository_file" "dotgithub_repository_terraform_aws_organization_definition" {
+  repository          = github_repository.organization.name
+  branch              = github_branch_default.main.branch
+  file                = "organization.tfe.tf"
+  content             = file("${path.module}/organization.tfe.tf")
   overwrite_on_create = true
 
   lifecycle {

@@ -60,7 +60,7 @@ resource "github_repository_file" "dotgithub_repository_terraformignore_definiti
 resource "github_repository_file" "dotgithub_repository_definition" {
   repository          = github_repository.organization.name
   branch              = github_branch_default.main.branch
-  file                = "dotgithub.tf"
+  file                = "dotgithub.github.tf"
   content             = "This content is ignored, do not touch"
   overwrite_on_create = true
 
@@ -119,12 +119,23 @@ resource "github_repository_file" "dotgithub_repository_terraform_workflow_defin
   }
 }
 
-
 resource "github_repository_file" "dotgithub_repository_aws_organization_workflow_definition" {
   repository          = github_repository.organization.name
   branch              = github_branch_default.main.branch
   file                = ".github/workflows/add-aws-organization-infrastructure-repository.yml"
   content             =  "This content is ignored, do not touch"
+  overwrite_on_create = true
+
+  lifecycle {
+    ignore_changes = all
+  }
+}
+
+resource "github_repository_file" "dotgithub_repository_terraform_aws_organization_definition" {
+  repository          = github_repository.organization.name
+  branch              = github_branch_default.main.branch
+  file                = "organization.tfe.tf"
+  content             = "This content is ignored, do not touch"
   overwrite_on_create = true
 
   lifecycle {

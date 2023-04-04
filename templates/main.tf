@@ -25,6 +25,11 @@ provider "github" {
   owner = var.organization_name
 }
 
+provider "tfe" {
+  hostname = "app.terraform.io"
+  token    = var.tfe_team_token
+}
+
 provider "aws" {
   region = "us-east-1"
 }

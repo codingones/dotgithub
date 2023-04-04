@@ -1,8 +1,19 @@
 # .github
 
-Ce dépôt a pour vocation de décrire votre projet sur la page d'accueil de l'organization GitHub.
+Ce dépôt a pour vocation de proposer :
+  - un README.md dédié à la présentation de votre organization
+    - Le contenu affiché est rédigé dans le fichier [README.md du dossier profile](./profile/README.md).
+  - la capacité de déployer rapidement via terraform des dépots templates avec les configurations appropriées à vos projets.
+    - Pour rajouter l'intégration AWS Organizations il vous faut:
+      - Définir les secrets dans ce dépot TRANSIENT_AWS_ACCESS_KEY_ID et TRANSIENT_AWS_SECRET_ACCESS_KEY à partir d'un compte root AWS
+      - Run l'action 'Add - AWS Organization - Organizational Unit and its associated Management Account infrastructure file'
+      - Run l'action 'Apply the infrastructure configuration'
+      - Delete TRANSIENT_AWS_ACCESS_KEY_ID
+      - Delete TRANSIENT_AWS_SECRET_ACCESS_KEY
+      - Delete le workflow add-aws-organization-infrastructure-repository.yml
 
-Le contenu affiché est rédigé dans le fichier [README.md du dossier profile](./profile/README.md).
+
+
 
 # Développement avec Terraform
 

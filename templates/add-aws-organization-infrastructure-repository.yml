@@ -1,27 +1,43 @@
-name: Clone File
+name: Add - AWS Organization - Organizational Unit and its associated Management Account infrastructure file
 
 on:
   workflow_dispatch:
+  inputs:
+    aws-organization-root-id:
+      required: true
+      type: string
+      description: "The organizational unit parent account id, found on https://us-east-1.console.aws.amazon.com/organizations/v2/home/accounts when logged on an account with access to your root AWS Organization"
+    aws-organization-management-account-email:
+      required: true
+      type: string
+      description: "An email not currently associated with aws for the organizational unit management account, if not provided will default to your YourGithubEmail+aws-ou-ORGANIZATION@yourdomain"
+    aws-organization-management-account-name:
+      required: true
+      type: string
+      description: "organizational unit management account name, if not provided will default to 'ma-ou-ORGANIZATION'"
 
 jobs:
   add-aws-organization-infrastructure:
     runs-on: ubuntu-latest
     steps:
-      - name: Get current repository organization
+      - name: Generate needed variables
         id: repo_org
         run: |
           org_name=$(echo $GITHUB_REPOSITORY | cut -d '/' -f 1)
           echo "Organization: $org_name"
           echo "org_name=$org_name" >> $GITHUB_ENV
-
-      - name: Get user information
-        id: user_info
-        run: |
-          response=$(curl -s -H "Authorization: token ${{ secrets.SETUP_TOKEN }}" https://api.github.com/user)
-          user_name=$(echo "$response" | jq -r '.name')
-          user_email=$(echo "$response" | jq -r '.email')
+          
+          github_user_info=$(curl -s -H "Authorization: token ${{ secrets.SETUP_TOKEN }}" https://api.github.com/user)
+          
+          user_name=$(echo "$github_user_info" | jq -r '.name')
+          user_email=$(echo "$github_user_info" | jq -r '.email')
+          username=$(echo $email | cut -d'@' -f1)
+          domain=$(echo $email | cut -d'@' -f2)
+  
           echo "user_name=$user_name" >> $GITHUB_ENV
           echo "user_email=$user_email" >> $GITHUB_ENV
+          echo "aws_ma_ou_default_email=${username}+aws-ou-${org_name}@${domain}" >> $GITHUB_ENV
+          echo "aws_ma_ou_default_name=ma-ou-$org_name" >> $GITHUB_ENV
 
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -31,24 +47,117 @@ jobs:
 
       - name: Clone infrastructure file from remote repository
         run: |
-          curl -O https://raw.githubusercontent.com/codingones/aws-infrastructure-templates/main/aws-organization-infrastructure.tf
+          curl -O https://raw.githubusercontent.com/codingones/aws-infrastructure-templates/main/aws-organization-infrastructure.aws.terraform.tfe.tf
+
+      - name: Add 'aws_organization_root_id', 'aws_organization_management_account_email', 'aws_organization_management_account_name' variables to workspace
+        env:
+          TF_CLOUD_API_TOKEN: ${{ secrets.TF_API_TOKEN }}
+          WORKSPACE_ID: ${{ env.workspace_id }}
+          ORG_NAME: ${{ env.org_name }}
+          AWS_ORGANIZATION_ROOT_ID: ${{ inputs.aws-organization-root-id }}
+          AWS_ORGANIZATION_MANAGEMENT_ACCOUNT_EMAIL: ${{ inputs.aws-organization-management-account-email }} ?? ${{ env.aws_ma_ou_default_email }}
+          AWS_ORGANIZATION_MANAGEMENT_ACCOUNT_NAME: ${{ inputs.aws-organization-management-account-name }} ?? ${{ env.aws_ma_ou_default_name }}
+          TRANSIENT_AWS_ACCESS_KEY_ID: ${{ secrets.TRANSIENT_AWS_ACCESS_KEY_ID }}
+          TRANSIENT_AWS_SECRET_ACCESS_KEY: ${{ secrets.TRANSIENT_AWS_SECRET_ACCESS_KEY }}
+        run: |
+          curl -s --request POST \
+            --url "https://app.terraform.io/api/v2/workspaces/$WORKSPACE_ID/vars" \
+            --header "Authorization: Bearer $TF_CLOUD_API_TOKEN" \
+            --header 'Content-Type: application/vnd.api+json' \
+            --data "{
+              \"data\": {
+                \"type\": \"vars\",
+                \"attributes\": {
+                  \"key\": \"AWS_ACCESS_KEY_ID\",
+                  \"value\": \"$TRANSIENT_AWS_ACCESS_KEY_ID\",
+                  \"description\": \"AWS Management Account Root Key id used to setup OU AWS credentials - THIS SHOULD BE REPLACED AUTOMATICALLY\",
+                  \"category\": \"env\",
+                  \"hcl\": false,
+                  \"sensitive\": true
+                }
+              }
+            }"
+          
+          curl -s --request POST \
+            --url "https://app.terraform.io/api/v2/workspaces/$WORKSPACE_ID/vars" \
+            --header "Authorization: Bearer $TF_CLOUD_API_TOKEN" \
+            --header 'Content-Type: application/vnd.api+json' \
+            --data "{
+              \"data\": {
+                \"type\": \"vars\",
+                \"attributes\": {
+                  \"key\": \"AWS_SECRET_ACCESS_KEY\",
+                  \"value\": \"$TRANSIENT_AWS_SECRET_ACCESS_KEY\",
+                  \"description\": \"AWS Management Account Root Secret Access Key used to setup OU AWS credentials - THIS SHOULD BE REPLACED AUTOMATICALLY\",
+                  \"category\": \"env\",
+                  \"hcl\": false,
+                  \"sensitive\": true
+                }
+              }
+            }"
+          
+          curl -s --request POST \
+            --url "https://app.terraform.io/api/v2/workspaces/$WORKSPACE_ID/vars" \
+            --header "Authorization: Bearer $TF_CLOUD_API_TOKEN" \
+            --header 'Content-Type: application/vnd.api+json' \
+            --data "{
+              \"data\": {
+                \"type\": \"vars\",
+                \"attributes\": {
+                  \"key\": \"aws_organization_root_id\",
+                  \"value\": \"$AWS_ORGANIZATION_ROOT_ID\",
+                  \"description\": \"AWS Root account id used as organizational unit parent",
+                  \"category\": \"terraform\",
+                  \"hcl\": false,
+                  \"sensitive\": false
+                }
+              }
+            }"
+          
+          curl -s --request POST \
+            --url "https://app.terraform.io/api/v2/workspaces/$WORKSPACE_ID/vars" \
+            --header "Authorization: Bearer $TF_CLOUD_API_TOKEN" \
+            --header 'Content-Type: application/vnd.api+json' \
+            --data "{
+              \"data\": {
+                \"type\": \"vars\",
+                \"attributes\": {
+                  \"key\": \"aws_organization_management_account_email\",
+                  \"value\": \"$AWS_ORGANIZATION_MANAGEMENT_ACCOUNT_EMAIL\",
+                  \"description\": \"AWS Organizational Unit Management account email",
+                  \"category\": \"terraform\",
+                  \"hcl\": false,
+                  \"sensitive\": false
+                }
+              }
+            }"
+          
+          curl -s --request POST \
+            --url "https://app.terraform.io/api/v2/workspaces/$WORKSPACE_ID/vars" \
+            --header "Authorization: Bearer $TF_CLOUD_API_TOKEN" \
+            --header 'Content-Type: application/vnd.api+json' \
+            --data "{
+              \"data\": {
+                \"type\": \"vars\",
+                \"attributes\": {
+                  \"key\": \"aws_organization_management_account_name\",
+                  \"value\": \"$AWS_ORGANIZATION_MANAGEMENT_ACCOUNT_NAME\",
+                  \"description\": \"AWS Organizational Unit Management account name",
+                  \"category\": \"terraform\",
+                  \"hcl\": false,
+                  \"sensitive\": false
+                }
+              }
+            }"
 
 
-      #- name: Replace ORGANIZATION_NAME with the actual organization name
-      #  uses: jacobtomlinson/gha-find-replace@v3
-      #  with:
-      #    find: "ORGANIZATION_NAME"
-      #    replace: ${{ env.org_name }}
-      #    include: "**"
-      #    regex: false
-#
-      #- name: Replace ORGANIZATION_NAME with the actual organization name
-      #  uses: jacobtomlinson/gha-find-replace@v3
-      #  with:
-      #    find: "USER_EMAIL"
-      #    replace: ${{ env.user_email }}
-      #    include: "**"
-      #    regex: false
+      - name: Replace ORGANIZATION_NAME with the actual organization name
+        uses: jacobtomlinson/gha-find-replace@v3
+        with:
+          find: "ORGANIZATION_NAME"
+          replace: ${{ env.org_name }}
+          include: "aws-organization-infrastructure.aws.terraform.tfe.tf"
+          regex: false
 
       - name: Commit and push changes
         run: |
